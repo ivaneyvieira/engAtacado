@@ -1,0 +1,23 @@
+version: "3"
+services:
+  engecopi:
+    image: tomcat:8
+    container_name: eng_atacado
+    ports:
+      - "8085:8080"
+    environment:
+      TZ: "America/Fortaleza"
+      EBEAN_PROPS: /etc/ebean.properties
+    volumes:
+      - ./build/libs/engAtacado-1.0.war:/usr/local/tomcat/webapps/engAtacado.war
+      - ./ebean.properties:/etc/ebean.properties
+    restart: always
+    networks:
+      rede_eng:
+        ipv4_address: 172.36.1.1
+networks:
+  rede_eng:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.36.0.0/16

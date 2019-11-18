@@ -1,27 +1,15 @@
 SELECT
     E.storeno AS storeno,
-    E.ordno AS numero,
-    cast (date AS DATE) AS date,
+    cast(E.ordno AS CHAR) AS numero,
+    cast(date AS DATE) AS data,
     userno AS userno,
-    IFNULL (
-           U.name,
-           'N/D') AS username,
-    IFNULL (
-           C.name,
-           'N/D') AS cliente,
+    IFNULL(U.name, 'N/D') AS username,
+    IFNULL(C.name, 'N/D') AS cliente,
     E.status AS status
-FROM sqldados.eord
-     AS E
-     LEFT JOIN sqldados.users
-               AS U ON U.no = E.userno
-     LEFT JOIN sqldados.custp
-               AS C ON C.no = E.custno
-WHERE
-    E.status IN (
-                1,
-                4) AND
-    E.storeno = 4 AND
-    E.ordno = :numero
-GROUP BY
-    storeno,
-    ordno
+FROM
+    sqldados.eord AS E
+    LEFT JOIN sqldados.users AS U ON U.no = E.userno
+    LEFT JOIN sqldados.custp AS C ON C.no = E.custno
+WHERE E.storeno = :storeno
+    AND E.ordno = :numero
+GROUP BY storeno, ordno

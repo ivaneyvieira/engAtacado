@@ -7,6 +7,7 @@ import br.com.astrosoft.atacado.model.enum.ETipoNota.ENTRADA
 import br.com.astrosoft.atacado.model.enum.ETipoNota.SAIDA
 import br.com.astrosoft.atacado.viewmodel.AtacadoViewModel
 import br.com.astrosoft.atacado.viewmodel.IAtacadoView
+import br.com.astrosoft.framework.util.format
 import br.com.astrosoft.framework.view.ViewLayout
 import com.github.mvysny.karibudsl.v10.addColumnFor
 import com.github.mvysny.karibudsl.v10.button
@@ -16,17 +17,18 @@ import com.github.mvysny.karibudsl.v10.grid
 import com.github.mvysny.karibudsl.v10.h6
 import com.github.mvysny.karibudsl.v10.horizontalLayout
 import com.github.mvysny.karibudsl.v10.isExpand
-import com.github.mvysny.karibudsl.v10.label
 import com.github.mvysny.karibudsl.v10.textField
 import com.vaadin.flow.component.combobox.ComboBox
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep
-import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment
+import com.vaadin.flow.component.grid.ColumnTextAlign.END
+import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.data.provider.DataProvider
+import com.vaadin.flow.data.renderer.NumberRenderer
 import com.vaadin.flow.router.Route
 import com.vaadin.flow.theme.Theme
 import com.vaadin.flow.theme.lumo.Lumo
-import java.time.format.DateTimeFormatter
+import java.text.DecimalFormat
 
 @Route("")
 @Theme(value = Lumo::class, variant = Lumo.DARK)
@@ -35,13 +37,12 @@ class AtacadoLayout: ViewLayout<IAtacadoView, AtacadoViewModel>(), IAtacadoView 
   private var comboTipoNota: ComboBox<ETipoNota>? = null
   private var edtCliente: TextField? = null
   private var edtUsuario: TextField? = null
-  private var edtNf: TextField? = null
   private var edtStatus: TextField? = null
   private var edtData: TextField? = null
   private var edtNumero: TextField? = null
   private var edtLoja: TextField? = null
   override val viewModel = AtacadoViewModel(this)
-  val dataProviderDados = DataProvider.ofCollection(emptyList<ItensNota>())
+  val dataProviderDados = DataProvider.ofCollection(mutableListOf<ItensNota>())
   override val tipoNota: ETipoNota?
     get() = comboTipoNota?.value
   override val numeroNota: String
@@ -51,25 +52,39 @@ class AtacadoLayout: ViewLayout<IAtacadoView, AtacadoViewModel>(), IAtacadoView 
     get() = notaSelecionada
     set(value) {
       notaSelecionada = value
-      if(value == null) {
-        edtLoja?.value = ""
-        edtPedidoNota?.value = ""
-        edtData?.value = ""
-        edtStatus?.value = ""
-        edtNf?.value = ""
-        edtUsuario?.value = ""
-        edtCliente?.value = ""
-      }
-      else {
-        edtLoja?.value = value.loja
-        edtPedidoNota?.value = value.pedido
-        edtData?.value = value.data.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-        edtStatus?.value = ""
-        edtNf?.value = value.numero
-        edtUsuario?.value = value.usuario
-        edtCliente?.value = value.cliente
-      }
+      if(value == null) clearNotaValue()
+      else setNotaValue(value)
     }
+
+  private fun setNotaValue(value: Nota) {
+    edtLoja?.value = value.loja
+    edtNumero?.value = value.numero
+    edtData?.value = value.data.format()
+    edtStatus?.value = ""
+    edtUsuario?.value = value.userName
+    edtCliente?.value = value.cliente
+    edtStatus?.value = value.statusDescricao
+    dataProviderDados.items.clear()
+    dataProviderDados.items.addAll(value.produtos)
+    dataProviderDados.refreshAll()
+  }
+
+  override fun clear() {
+    edtPedidoNota?.value = ""
+    nota = null
+    clearNotaValue()
+  }
+
+  private fun clearNotaValue() {
+    edtLoja?.value = ""
+    edtNumero?.value = ""
+    edtData?.value = ""
+    edtStatus?.value = ""
+    edtUsuario?.value = ""
+    edtCliente?.value = ""
+    edtStatus?.value = ""
+    dataProviderDados.items.clear()
+  }
 
   init {
     setSizeFull()
@@ -84,7 +99,7 @@ class AtacadoLayout: ViewLayout<IAtacadoView, AtacadoViewModel>(), IAtacadoView 
   }
 
   fun filtro() {
-    label("Filtro")
+    // label("Filtro")
     horizontalLayout {
       width = "100%"
       isSpacing = true
@@ -102,12 +117,11 @@ class AtacadoLayout: ViewLayout<IAtacadoView, AtacadoViewModel>(), IAtacadoView 
           val value = event.value
           updateCampos(value)
         }
-        value = SAIDA
-        updateCampos(value)
       }
       edtPedidoNota = textField("Número Pedido/Nota") {}
       horizontalLayout {
-        alignItems = Alignment.BASELINE
+        setWidthFull()
+        this.justifyContentMode = FlexComponent.JustifyContentMode.END
         button("Pesquisa") {
           addClickListener {
             viewModel.pesquisa()
@@ -124,14 +138,20 @@ class AtacadoLayout: ViewLayout<IAtacadoView, AtacadoViewModel>(), IAtacadoView 
           }
         }
       }
+      //Inicializa o filtro
+      val tipoNota = SAIDA
+      comboTipoNota?.value = tipoNota
+      updateCampos(tipoNota)
+
     }
   }
 
   private fun updateCampos(value: ETipoNota) {
     when(value) {
       ENTRADA -> edtPedidoNota?.label = "Nota fiscal loja 10"
-      else    -> edtPedidoNota?.label = "Pedido loja 10"
+      SAIDA   -> edtPedidoNota?.label = "Pedido loja 4"
     }
+    edtPedidoNota?.focus()
   }
 
   fun cabercalhoDados() {
@@ -149,16 +169,25 @@ class AtacadoLayout: ViewLayout<IAtacadoView, AtacadoViewModel>(), IAtacadoView 
                                  ResponsiveStep("10em", 4),
                                  ResponsiveStep("10em", 5),
                                  ResponsiveStep("10em", 6),
-                                 ResponsiveStep("10em", 7),
-                                 ResponsiveStep("10em", 8),
-                                 ResponsiveStep("10em", 9))
-        edtLoja = textField("Loja")
-        edtNumero = textField("Número")
-        edtData = textField("Data")
-        edtStatus = textField("Status")
-        edtNf = textField("NF")
-        edtUsuario = textField("Usuário")
-        edtCliente = textField("Cliente")
+                                 ResponsiveStep("10em", 7), ResponsiveStep("10em", 8))
+        edtLoja = textField("Loja") {
+          this.isReadOnly = true
+        }
+        edtNumero = textField("Número") {
+          this.isReadOnly = true
+        }
+        edtData = textField("Data") {
+          this.isReadOnly = true
+        }
+        edtStatus = textField("Status") {
+          this.isReadOnly = true
+        }
+        edtUsuario = textField("Usuário") {
+          this.isReadOnly = true
+        }
+        edtCliente = textField("Cliente") {
+          this.isReadOnly = true
+        }
 
         setColspan(edtCliente, 3)
       }
@@ -169,12 +198,33 @@ class AtacadoLayout: ViewLayout<IAtacadoView, AtacadoViewModel>(), IAtacadoView 
     grid(dataProvider = dataProviderDados) {
       isExpand = true
       //setSizeFull()
-      addColumnFor(ItensNota::codigo)
-      addColumnFor(ItensNota::descricao)
-      addColumnFor(ItensNota::grade)
-      addColumnFor(ItensNota::localizacao)
-      addColumnFor(ItensNota::quantidade)
-      addColumnFor(ItensNota::custoContabil)
+      addColumnFor(ItensNota::prdno) {
+        this.setHeader("Código")
+        this.textAlign = END
+        this.flexGrow = 1
+      }
+      addColumnFor(ItensNota::descricao) {
+        this.setHeader("Descrição")
+        this.flexGrow = 3
+      }
+      addColumnFor(ItensNota::grade) {
+        this.setHeader("Grade")
+        this.flexGrow = 1
+      }
+      addColumnFor(ItensNota::localizacao) {
+        this.setHeader("Localização")
+        this.flexGrow = 3
+      }
+      addColumnFor(ItensNota::quant, NumberRenderer(ItensNota::quant, DecimalFormat("0.00"))) {
+        this.setHeader("Quant")
+        this.textAlign = END
+        this.flexGrow = 1
+      }
+      addColumnFor(ItensNota::preco, NumberRenderer(ItensNota::preco, DecimalFormat("0.0000"))) {
+        this.setHeader("Custo")
+        this.textAlign = END
+        this.flexGrow = 1
+      }
     }
   }
 }

@@ -23,7 +23,6 @@ open class QueryDB(private val driver: String, val url: String, val username: St
     ds.maximumPoolSize = 5
 
     this.sql2o = Sql2o(ds)
-    //this.sql2o = Sql2o(url, username, password)
   }
 
   private fun registerDriver(driver: String) {
@@ -72,7 +71,7 @@ open class QueryDB(private val driver: String, val url: String, val username: St
   }
 
   private fun <T> buildQuery(file: String, proc: (Connection, Query) -> T): T {
-    val sql = readFile(file)
+    val sql = if(file.startsWith("/")) readFile(file) else file
     return this.sql2o.open().use {con ->
       val query = con.createQuery(sql)
       val time = System.currentTimeMillis()
@@ -95,5 +94,38 @@ open class QueryDB(private val driver: String, val url: String, val username: St
         $selectList;
       """.trimIndent())
     return stringBuild.toString()
+  }
+
+  fun script(file: String, lambda: (Query) -> Unit) {
+    val stratments = readFile(file)?.split(";").orEmpty().filter {it.isNotBlank() || it.isNotEmpty()}
+    sql2o.beginTransaction().use {con ->
+      stratments.forEach {sql ->
+        val query = con.createQuery(sql)
+        lambda(query)
+      }
+      con.commit()
+    }
+  }
+
+  fun Query.addOptionalParameter(name: String, value: String): Query {
+    if(this.paramNameToIdxMap.containsKey(name)) this.addParameter(name, value)
+    return this
+  }
+
+  fun Query.addOptionalParameter(name: String, value: Int): Query {
+    if(this.paramNameToIdxMap.containsKey(name)) this.addParameter(name, value)
+    return this
+  }
+
+  fun Query.addOptionalParameter(name: String, value: Double): Query {
+    if(this.paramNameToIdxMap.containsKey(name)) this.addParameter(name, value)
+    return this
+  }
+
+  fun transaction(block: (Connection) -> Unit) {
+    sql2o.beginTransaction().use {con ->
+      block(con)
+      con.commit()
+    }
   }
 }

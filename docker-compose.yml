@@ -13,10 +13,10 @@ services:
       - ./ebean.properties:/etc/ebean.properties
     restart: always
     networks:
-      rede_eng:
+      rede_ata:
         ipv4_address: 172.36.1.1
 networks:
-  rede_eng:
+  rede_ata:
     ipam:
       driver: default
       config:

@@ -1,12 +1,16 @@
-/*
+/****************************************************************************
+  Parametros
+****************************************************************************/
 DO @LOJA := :storeno;
 DO @PEDIDO := :ordno;
 DO @SERIE := 66;
 DO @TIPO := :tipo;
 DO @FATOR := IF( @TIPO = 'E' , 1 , - 1 );
 DO @DOC := IF( @TIPO = 'E' , " AJUS ENT " , " AJUS SAI " ); 
-*/
 
+/****************************************************************************
+  Dados do pedido
+****************************************************************************/
 DROP TABLE IF EXISTS T;
 CREATE TEMPORARY TABLE T 
 SELECT E.storeno, E.ordno, E.prdno, E.grade, qtty, ROUND(IF(I.last_cost = 0, I.cm_varejo_otn, I.last_cost)) / 100 AS 
@@ -28,23 +32,22 @@ FROM sqldados.eoprd AS E
 WHERE E.storeno = @LOJA AND
   E.ordno = @PEDIDO;
   
-  
+/****************************************************************************
+  Nota de Entrada
+****************************************************************************/
 UPDATE sqldados.stk 
     INNER JOIN T USING( storeno , prdno , grade ) 
   SET longReserva1 = qtty_atacado 
 WHERE longReserva2 <> T.ordno;
-
 
 UPDATE sqldados.stk 
     INNER JOIN T USING( storeno , prdno , grade ) 
   SET qtty_atacado = qtty_atacado + @FATOR * T . qtty , last_date = CURRENT_DATE * 1 
 WHERE longReserva2 <> T.ordno;
 
-
 UPDATE sqldados.stk 
     INNER JOIN T USING( storeno , prdno , grade ) 
-  SET longReserva2 = T . ordno;
-  
+  SET longReserva2 = T.ordno;
   
 DO @INVDEL :=(SELECT MAX(invno) 
               FROM sqldados.inv 
@@ -53,16 +56,13 @@ DO @INVDEL :=(SELECT MAX(invno)
                 invse = @SERIE AND
                 c1 = @DOC );
                 
-                
 DO @INVNO :=( SELECT MAX(invno) + 1 
               FROM sqldados.inv);
-              
               
 DO @NFNO := IFNULL((SELECT MAX(NO) +1 
                     FROM lastno 
                     WHERE se = @SERIE AND
                       storeno = @LOJA ), 1 );
-                      
                       
 INSERT INTO sqldados.inv( invno, vendno, ordno, xfrno, issue_date, DATE, comp_date, ipi, icm, freight, netamt, grossamt, 
   subst_trib, discount, prdamt, despesas, base_ipi, aliq, cfo, nfNfno, auxLong1, auxLong2, auxMoney1, auxMoney2, 
@@ -94,7 +94,6 @@ FROM T
 WHERE @TIPO = 'E' 
 GROUP BY storeno, ordno;
 
-
 INSERT 
 INTO sqldados.iprd( invno, qtty, fob, cost, DATE, ipi, auxLong1, auxLong2, frete, seguro, despesas, freteIpi, qttyRessar
   , baseIcmsSubst, icmsSubst, icms, discount, fob4, cost4, icmsAliq, cfop, auxLong3, auxLong4, auxLong5, auxMy1, auxMy2, 
@@ -113,13 +112,14 @@ SELECT @INVNO AS invno , qtty , cost AS fob , cost , CURRENT_DATE * 1 AS DATE , 
 FROM T 
 WHERE @TIPO = 'E';
 
-
 UPDATE sqldados.stk 
     INNER JOIN T USING( storeno , prdno , grade ) 
   SET last_doc = CONCAT( @NFNO , " 66 " ) 
 WHERE @TIPO = 'E';
 
-
+/****************************************************************************
+  Nota de Saida
+****************************************************************************/
 DO @XANO := IFNULL((SELECT MAX(xano) +1 
                     FROM sqldados.nf 
                     WHERE pdvno = 0 AND

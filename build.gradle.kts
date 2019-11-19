@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 val karibudsl_version = "0.7.0"
 
 plugins {
-  kotlin("jvm") version "1.3.50"
+  kotlin("jvm") version "1.3.60"
   id("org.gretty") version "2.3.1"
   id("com.devsoap.vaadin-flow") version "1.2"
 }
@@ -67,6 +67,7 @@ dependencies {
   compile("org.slf4j:slf4j-simple:1.7.28")
 
   compile(kotlin("stdlib-jdk8"))
+  //compile("org.jetbrains.kotlin:kotlin-reflect")
   // test support
   testCompile("com.github.mvysny.kaributesting:karibu-testing-v10:1.1.16")
   testCompile("com.github.mvysny.dynatest:dynatest-engine:0.15")

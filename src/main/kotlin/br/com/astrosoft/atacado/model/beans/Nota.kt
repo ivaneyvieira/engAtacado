@@ -9,8 +9,6 @@ class Nota(val storeno: String,
            val userName: String,
            val cliente: String,
            val status: Int) {
-  val loja: String
-    get() = storeno.toString()
   val statusDescricao: String
     get() = when(status) {
       0    -> "Incluido"
@@ -32,4 +30,10 @@ class Nota(val storeno: String,
     _produtos = mutableListOf<ItensNota>()
     _produtos.addAll(produtos)
   }
+
+  val valor
+    get() = produtos.sumBy {
+      val valor = it.quant * it.preco * 100
+      valor.toInt()
+    } / 100.00
 }

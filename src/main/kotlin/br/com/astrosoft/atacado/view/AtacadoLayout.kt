@@ -40,7 +40,6 @@ class AtacadoLayout: ViewLayout<IAtacadoView, AtacadoViewModel>(), IAtacadoView 
   private var edtStatus: TextField? = null
   private var edtData: TextField? = null
   private var edtNumero: TextField? = null
-  private var edtLoja: TextField? = null
   override val viewModel = AtacadoViewModel(this)
   val dataProviderDados = DataProvider.ofCollection(mutableListOf<ItensNota>())
   override val tipoNota: ETipoNota?
@@ -57,7 +56,6 @@ class AtacadoLayout: ViewLayout<IAtacadoView, AtacadoViewModel>(), IAtacadoView 
     }
 
   private fun setNotaValue(value: Nota) {
-    edtLoja?.value = value.loja
     edtNumero?.value = value.numero
     edtData?.value = value.data.format()
     edtStatus?.value = ""
@@ -76,7 +74,6 @@ class AtacadoLayout: ViewLayout<IAtacadoView, AtacadoViewModel>(), IAtacadoView 
   }
 
   private fun clearNotaValue() {
-    edtLoja?.value = ""
     edtNumero?.value = ""
     edtData?.value = ""
     edtStatus?.value = ""
@@ -92,6 +89,10 @@ class AtacadoLayout: ViewLayout<IAtacadoView, AtacadoViewModel>(), IAtacadoView 
     filtro()
     cabercalhoDados()
     gridDados()
+    //Inicializa o os campos
+    val tipoNota = SAIDA
+    comboTipoNota?.value = tipoNota
+    updateCampos(tipoNota)
   }
 
   fun titulo() {
@@ -99,7 +100,6 @@ class AtacadoLayout: ViewLayout<IAtacadoView, AtacadoViewModel>(), IAtacadoView 
   }
 
   fun filtro() {
-    // label("Filtro")
     horizontalLayout {
       width = "100%"
       isSpacing = true
@@ -138,18 +138,19 @@ class AtacadoLayout: ViewLayout<IAtacadoView, AtacadoViewModel>(), IAtacadoView 
           }
         }
       }
-      //Inicializa o filtro
-      val tipoNota = SAIDA
-      comboTipoNota?.value = tipoNota
-      updateCampos(tipoNota)
-
     }
   }
 
   private fun updateCampos(value: ETipoNota) {
     when(value) {
-      ENTRADA -> edtPedidoNota?.label = "Nota fiscal loja 10"
-      SAIDA   -> edtPedidoNota?.label = "Pedido loja 4"
+      ENTRADA -> {
+        edtPedidoNota?.label = "Nota fiscal loja 10"
+        edtNumero?.label = "Numero da nota"
+      }
+      SAIDA   -> {
+        edtPedidoNota?.label = "Pedido loja 4"
+        edtNumero?.label = "Numero do pedido"
+      }
     }
     edtPedidoNota?.focus()
   }
@@ -168,11 +169,8 @@ class AtacadoLayout: ViewLayout<IAtacadoView, AtacadoViewModel>(), IAtacadoView 
                                  ResponsiveStep("10em", 3),
                                  ResponsiveStep("10em", 4),
                                  ResponsiveStep("10em", 5),
-                                 ResponsiveStep("10em", 6),
-                                 ResponsiveStep("10em", 7), ResponsiveStep("10em", 8))
-        edtLoja = textField("Loja") {
-          this.isReadOnly = true
-        }
+                                 ResponsiveStep("10em", 6), ResponsiveStep("10em", 7))
+
         edtNumero = textField("Número") {
           this.isReadOnly = true
         }

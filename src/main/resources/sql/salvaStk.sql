@@ -6,7 +6,7 @@ WHERE longReserva2 <> :numero
   AND grade = :grade;
 
 UPDATE sqldados.stk
-  SET qtty_atacado = qtty_atacado + :qtty,
+  SET qtty_atacado = qtty_atacado + :qtty * 1000,
   last_date = CURRENT_DATE * 1
 WHERE longReserva2 <> :numero
   AND storeno = :storeno

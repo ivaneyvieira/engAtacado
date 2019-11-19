@@ -1,6 +1,6 @@
 SELECT
     O.storeno AS storeno,
-    CONCAT (O.nfname, '/', O.invse) AS numero,
+    cast(CONCAT (O.nfname, '/', O.invse) as char) AS numero,
     cast(issue_date AS DATE) AS data,
     usernoFirst AS userno,
     IFNULL(U.name, 'N/D') AS username,

@@ -35,12 +35,6 @@ class AtacadoViewModel(view: IAtacadoView): ViewModel<IAtacadoView>(view) {
     if(numeroNota.isBlank()) throw ENumeroOperacao()
     val nota = saci.findPedido(storenoPedido, numeroNota)
     view.nota = nota
-    nota?.let {nota ->
-      if(nota.status != 1 && nota.status != 4) {
-        view.clear()
-        throw EStatusOperacao(nota.statusDescricao)
-      }
-    }
   }
 
   fun processamento() = exec {

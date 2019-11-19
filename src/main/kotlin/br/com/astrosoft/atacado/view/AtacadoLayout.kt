@@ -40,6 +40,8 @@ class AtacadoLayout: ViewLayout<IAtacadoView, AtacadoViewModel>(), IAtacadoView 
   private var edtStatus: TextField? = null
   private var edtData: TextField? = null
   private var edtNumero: TextField? = null
+  private var edtNfSaida: TextField? = null
+  private var edtNfEntrada: TextField? = null
   override val viewModel = AtacadoViewModel(this)
   val dataProviderDados = DataProvider.ofCollection(mutableListOf<ItensNota>())
   override val tipoNota: ETipoNota?
@@ -62,6 +64,8 @@ class AtacadoLayout: ViewLayout<IAtacadoView, AtacadoViewModel>(), IAtacadoView 
     edtUsuario?.value = value.userName
     edtCliente?.value = value.cliente
     edtStatus?.value = value.statusDescricao
+    edtNfSaida?.value = value.notaSaida
+    edtNfEntrada?.value = value.notaEntrada
     dataProviderDados.items.clear()
     dataProviderDados.items.addAll(value.produtos)
     dataProviderDados.refreshAll()
@@ -80,6 +84,8 @@ class AtacadoLayout: ViewLayout<IAtacadoView, AtacadoViewModel>(), IAtacadoView 
     edtUsuario?.value = ""
     edtCliente?.value = ""
     edtStatus?.value = ""
+    edtNfSaida?.value = ""
+    edtNfEntrada?.value = ""
     dataProviderDados.items.clear()
   }
 
@@ -169,7 +175,10 @@ class AtacadoLayout: ViewLayout<IAtacadoView, AtacadoViewModel>(), IAtacadoView 
                                  ResponsiveStep("10em", 3),
                                  ResponsiveStep("10em", 4),
                                  ResponsiveStep("10em", 5),
-                                 ResponsiveStep("10em", 6), ResponsiveStep("10em", 7))
+                                 ResponsiveStep("10em", 6),
+                                 ResponsiveStep("10em", 7),
+                                 ResponsiveStep("10em", 8),
+                                 ResponsiveStep("10em", 9))
 
         edtNumero = textField("Número") {
           this.isReadOnly = true
@@ -181,6 +190,12 @@ class AtacadoLayout: ViewLayout<IAtacadoView, AtacadoViewModel>(), IAtacadoView 
           this.isReadOnly = true
         }
         edtUsuario = textField("Usuário") {
+          this.isReadOnly = true
+        }
+        edtNfSaida = textField("NF Saída") {
+          this.isReadOnly = true
+        }
+        edtNfEntrada = textField("NF Entrada") {
           this.isReadOnly = true
         }
         edtCliente = textField("Cliente") {

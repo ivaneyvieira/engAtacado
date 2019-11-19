@@ -1,5 +1,6 @@
 package br.com.astrosoft.atacado.model.beans
 
+import br.com.astrosoft.atacado.model.saci
 import java.util.*
 
 class Nota(val storeno: String,
@@ -7,8 +8,7 @@ class Nota(val storeno: String,
            val data: Date,
            val userno: Int,
            val userName: String,
-           val cliente: String,
-           val status: Int) {
+           val cliente: String, val status: Int, val origem: String, val pedido: String) {
   val statusDescricao: String
     get() = when(status) {
       0    -> "Incluido"
@@ -36,4 +36,31 @@ class Nota(val storeno: String,
       val valor = it.quant * it.preco * 100
       valor.toInt()
     } / 100.00
+  val notaSaida: String
+    get() {
+      return when(origem) {
+        "P"  -> notaSaida(4)
+        "S"  -> notaSaida(10)
+        else -> ""
+      }
+    }
+  val notaEntrada: String
+    get() {
+      return when(origem) {
+        "P"  -> notaEntrada(10)
+        "S"  -> notaEntrada(4)
+        else -> ""
+      }
+    }
+
+  private fun notaEntrada(storeno: Int): String {
+    return saci.findNotaEntrada(storeno, "", numero)?.numero ?: ""
+  }
+
+  private fun notaSaida(storeno: Int): String {
+    return saci.findNotaSaida(storeno, "", numero)?.numero ?: ""
+  }
+
+  val isProcessada
+    get() = notaSaida.isNotEmpty() && notaEntrada.isNotEmpty()
 }

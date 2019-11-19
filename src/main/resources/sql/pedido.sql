@@ -5,7 +5,9 @@ SELECT
     userno AS userno,
     IFNULL(U.name, 'N/D') AS username,
     IFNULL(C.name, 'N/D') AS cliente,
-    E.status AS status
+    E.status AS status,
+    'P' AS origem,
+    cast(E.ordno AS CHAR) AS pedido
 FROM
     sqldados.eord AS E
     LEFT JOIN sqldados.users AS U ON U.no = E.userno

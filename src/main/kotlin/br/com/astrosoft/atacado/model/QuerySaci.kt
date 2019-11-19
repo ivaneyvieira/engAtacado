@@ -8,20 +8,24 @@ import br.com.astrosoft.framework.util.lpad
 
 class QuerySaci: QueryDB(driver, url, username, password) {
   fun findPedido(storeno: Int, numero: String): Nota? =
-    findNota(storeno, numero, sqlNota = "/sql/pedido.sql", sqlItens = "/sql/itensPedido.sql")
+    findNota(storeno, numero, pedido = "", sqlNota = "/sql/pedido.sql", sqlItens = "/sql/itensPedido.sql")
 
-  fun findNotaSaida(storeno: Int, numero: String): Nota? =
-    findNota(storeno, numero, sqlNota = "/sql/notaSaida.sql", sqlItens = "/sql/itensNotaSaida.sql")
+  fun findNotaSaida(storeno: Int, numero: String, pedido: String = ""): Nota? =
+    findNota(storeno, numero, pedido, sqlNota = "/sql/notaSaida.sql", sqlItens = "/sql/itensNotaSaida.sql")
 
-  private fun findNota(storeno: Int, numero: String, sqlNota: String, sqlItens: String): Nota? {
+  fun findNotaEntrada(storeno: Int, numero: String, pedido: String = ""): Nota? =
+    findNota(storeno, numero, pedido, sqlNota = "/sql/notaEntrada.sql", sqlItens = "/sql/itensNotaEntrada.sql")
+
+  private fun findNota(storeno: Int, numero: String, pedido: String, sqlNota: String, sqlItens: String): Nota? {
     return query(sqlNota) {q ->
-      q.addParameter("storeno", storeno)
-      q.addParameter("numero", numero)
+      q.addOptionalParameter("storeno", storeno)
+      q.addOptionalParameter("numero", numero)
+      q.addOptionalParameter("pedido", pedido)
       q.executeAndFetchFirst(Nota::class.java)
     }?.apply {
       this.initProdutos(query(sqlItens) {q ->
-        q.addParameter("storeno", storeno)
-        q.addParameter("numero", numero)
+        q.addOptionalParameter("storeno", storeno)
+        q.addOptionalParameter("numero", numero)
         q.executeAndFetch(ItensNota::class.java)
       })
     }
@@ -128,10 +132,20 @@ class QuerySaci: QueryDB(driver, url, username, password) {
 
   private fun newNfno(storeno: Int): Int {
     val sql = "SELECT MAX(no) +1 FROM lastno WHERE se = '66' AND storeno = :storeno"
-    return query(sql) {q ->
+    val num = query(sql) {q ->
       q.addParameter("storeno", storeno)
       q.executeScalar(Int::class.java)
-    } ?: 1
+    }
+    val nfno = if(num == 0) 1 else num
+    val sqlUpdate =
+      "INSERT INTO sqldados.lastno(no, storeno, dupse, se, padbyte) " + "VALUES(:numero, :storeno , 0 , 66 , '')"
+
+    query(sqlUpdate) {q ->
+      q.addParameter("storeno", storeno)
+      q.addParameter("numero", nfno)
+      q.executeUpdate()
+    }
+    return nfno
   }
 
   private fun newXano(storeno: Int): Int {

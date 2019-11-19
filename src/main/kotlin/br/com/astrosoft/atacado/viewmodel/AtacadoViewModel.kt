@@ -40,18 +40,24 @@ class AtacadoViewModel(view: IAtacadoView): ViewModel<IAtacadoView>(view) {
   fun processamento() = exec {
     val nota = view.nota ?: throw EDadosNaoSelecionado()
     val tipoNota = view.tipoNota ?: throw ETipoOperacaoInvalido()
+    if(nota.isProcessada) throw ENotaProcessada()
     when(tipoNota) {
       SAIDA   -> processaPedido(nota)
       ENTRADA -> processaNota(nota)
     }
+    view.showInformation("Processamento concluido com sucesso!!!")
   }
 
   private fun processaNota(nota: Nota) {
+    pesquisaNota()
     saci.criaNotaTransferencia(storenoNota, storenoPedido, nota)
+    pesquisaNota()
   }
 
   private fun processaPedido(nota: Nota) {
+    pesquisaPedido()
     saci.criaNotaTransferencia(storenoPedido, storenoNota, nota)
+    pesquisaPedido()
   }
 
   fun desfaz() {
@@ -71,3 +77,4 @@ class ETipoOperacaoInvalido: EViewModelError("O tipo de operação é inválido"
 class ENumeroOperacao: EViewModelError("O numero da operação é inválido")
 class EStatusOperacao(val status: String): EViewModelError("O status $status não é aceito")
 class EDadosNaoSelecionado: EViewModelError("Dados não selecionado")
+class ENotaProcessada: EViewModelError("Esse número já foi processado")

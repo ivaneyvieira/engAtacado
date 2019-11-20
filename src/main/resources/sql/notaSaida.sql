@@ -8,7 +8,8 @@ SELECT
     91 AS status,
     'S' AS origem,
     cast(O.eordno AS CHAR) AS pedido,
-    cast(O.nfno AS CHAR) AS nfno
+    cast(O.nfno AS CHAR) AS nfno,
+    O.STATUS = 1 as cancelada
 FROM sqldados.nf O
      LEFT JOIN sqldados.custp AS C ON C.no = O.custno
 WHERE

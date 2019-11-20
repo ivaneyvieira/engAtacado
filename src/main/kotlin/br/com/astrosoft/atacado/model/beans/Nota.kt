@@ -11,8 +11,7 @@ class Nota(val storeno: String,
            val cliente: String,
            val status: Int,
            val origem: String,
-           val pedido: String,
-           val nfno: String) {
+           val pedido: String, val nfno: String, val cancelada: Boolean) {
   val statusDescricao: String
     get() = when(status) {
       0    -> "Incluido"
@@ -60,11 +59,15 @@ class Nota(val storeno: String,
     }
 
   private fun notaEntrada(storeno: Int): String {
-    return saci.findNotaEntrada(storeno, "", nfno)?.numero ?: ""
+    val nota = saci.findNotaEntrada(storeno, "", nfno) ?: return ""
+    return if(nota.cancelada) ""
+    else nota.numero
   }
 
   private fun notaSaida(storeno: Int): String {
-    return saci.findNotaSaida(storeno, "", nfno)?.numero ?: ""
+    val nota = saci.findNotaSaida(storeno, "", nfno) ?: return ""
+    return if(nota.cancelada) ""
+    else nota.numero
   }
 
   val isProcessada

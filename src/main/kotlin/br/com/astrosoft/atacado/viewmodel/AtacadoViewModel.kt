@@ -34,6 +34,12 @@ class AtacadoViewModel(view: IAtacadoView): ViewModel<IAtacadoView>(view) {
     if(nota?.produtos?.isEmpty() == true) throw ENotaPedidoSemProdutos()
     view.nota = nota
     if(nota == null) view.showInformation("Pedido/Nota não encontrado")
+    else {
+      if(nota.cancelada) {
+        view.nota = null
+        throw ENotaPedidoCancelada()
+      }
+    }
   }
 
   fun processamento() = exec {
@@ -57,8 +63,16 @@ class AtacadoViewModel(view: IAtacadoView): ViewModel<IAtacadoView>(view) {
     pesquisa()
   }
 
-  fun desfaz() {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+  fun desfaz() = exec {
+    val nota = view.nota ?: throw EDadosNaoSelecionado()
+    val tipoNota = view.tipoNota ?: throw ETipoOperacaoInvalido()
+    if(!nota.isProcessada) throw ENaoNotaProcessada()
+    when(tipoNota) {
+      SAIDA   -> saci.desfazPedidoNota(storenoPedido, storenoNota, nota)
+      ENTRADA -> saci.desfazPedidoNota(storenoNota, storenoPedido, nota)
+    }
+    view.showInformation("Processamento desfeito com sucesso!!!")
+    pesquisa()
   }
 }
 
@@ -76,3 +90,5 @@ class EStatusOperacao(val status: String): EViewModelError("O status $status nã
 class EDadosNaoSelecionado: EViewModelError("Dados da Nota/Pedido não foram selecionado")
 class ENotaProcessada(): EViewModelError("Nota/Pedido já foi processado")
 class ENotaPedidoSemProdutos(): EViewModelError("A Nota/Pedido está sem produtos")
+class ENotaPedidoCancelada(): EViewModelError("A Nota/Pedido está cancelada")
+class ENaoNotaProcessada(): EViewModelError("Nota/Pedido não foi processado")

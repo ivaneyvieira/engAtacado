@@ -8,7 +8,8 @@ SELECT
     E.status AS status,
     'P' AS origem,
     cast(E.ordno AS CHAR) AS pedido,
-    cast(E.ordno AS CHAR) AS nfno
+    cast(E.ordno AS CHAR) AS nfno,
+    0 AS cancelada
 FROM
     sqldados.eord AS E
     LEFT JOIN sqldados.users AS U ON U.no = E.userno

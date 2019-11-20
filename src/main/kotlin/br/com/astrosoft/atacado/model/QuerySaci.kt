@@ -200,33 +200,47 @@ class QuerySaci: QueryDB(driver, url, username, password) {
     }
   }
 
-  private fun cancelaNotaEntrada(storeno: Int, numero: String) {
-    transaction {
-      val sqlCancela = """UPDATE sqldados.inv
+  fun desfazPedidoNota(storenoSaida: Int, storenoEntrada: Int, nota: Nota) {
+    val pedido = nota.pedido
+    findNotaSaida(storenoSaida, numero = "", pedido = pedido)?.let {
+      cancelaNotaSaida(it)
+    }
+    findNotaEntrada(storenoEntrada, numero = "", pedido = pedido)?.let {
+      cancelaNotaEntrada(it)
+    }
+    nota.produtos.forEach {item ->
+      salvaStk(storenoSaida, 0, item.prdno, item.grade, item.quant)
+      salvaStk(storenoEntrada, 0, item.prdno, item.grade, -item.quant)
+    }
+  }
+
+  private fun cancelaNotaEntrada(nota: Nota) {
+    val storeno = nota.storeno
+    val numero = nota.nfno
+    val sqlCancela = """UPDATE sqldados.inv
                           SET  bits = bits | POW(2, 4)
                           WHERE nfname = :numero
                             AND storeno = :storeno
                             AND invse = '66'"""
-      query(sqlCancela) {q ->
-        q.addOptionalParameter("storeno", storeno)
-        q.addOptionalParameter("numero", numero)
-        q.executeUpdate()
-      }
+    query(sqlCancela) {q ->
+      q.addOptionalParameter("storeno", storeno)
+      q.addOptionalParameter("numero", numero)
+      q.executeUpdate()
     }
   }
 
-  private fun cancelaNotaSaida(storeno: Int, numero: String) {
-    transaction {
-      val sqlCancela = """UPDATE sqldados.nf
+  private fun cancelaNotaSaida(nota: Nota) {
+    val storeno = nota.storeno
+    val numero = nota.nfno
+    val sqlCancela = """UPDATE sqldados.nf
                           SET STATUS = 1
                           WHERE nfno    = :numero
                             AND storeno = :storeno
                             AND nfse    = '66'"""
-      query(sqlCancela) {q ->
-        q.addOptionalParameter("storeno", storeno)
-        q.addOptionalParameter("numero", numero)
-        q.executeUpdate()
-      }
+    query(sqlCancela) {q ->
+      q.addOptionalParameter("storeno", storeno)
+      q.addOptionalParameter("numero", numero)
+      q.executeUpdate()
     }
   }
 

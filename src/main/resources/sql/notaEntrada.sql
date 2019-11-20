@@ -8,7 +8,8 @@ SELECT
     90 AS status,
     'E' as origem,
     cast(O.ordno AS CHAR) AS pedido,
-    cast(O.nfname AS CHAR) AS nfno
+    cast(O.nfname AS CHAR) AS nfno,
+    (O.bits & POW(2, 4)) <> 0 AS cancelada
 FROM sqldados.inv O
      LEFT JOIN sqldados.users AS U
        ON U.no = O.usernoFirst

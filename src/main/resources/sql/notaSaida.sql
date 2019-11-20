@@ -1,13 +1,14 @@
 SELECT
     O.storeno AS storeno,
-    cast(CONCAT(O.nfno, '/', O.nfse) AS char) AS numero,
+    cast(CONCAT(O.storeno, ' ', O.nfno, '/', O.nfse) AS char) AS numero,
     cast(issuedate AS DATE) AS data,
     0 AS userno,
     '' AS username,
     IFNULL(C.name, 'N/D') AS cliente,
-    1 AS status,
+    91 AS status,
     'S' AS origem,
-    cast(O.eordno AS CHAR) AS pedido
+    cast(O.eordno AS CHAR) AS pedido,
+    cast(O.nfno AS CHAR) AS nfno
 FROM sqldados.nf O
      LEFT JOIN sqldados.custp AS C ON C.no = O.custno
 WHERE

@@ -1,3 +1,20 @@
+insert ignore into sqldados.stk(qtty_varejo, qtty_atacado, cm_varejo, cm_real, last_date, last_qtty,
+  last_cost, avg_date, chk_qtty, chk_date, chk_empno, lastchangedt, longReserva1,
+  longReserva2, longReserva3, longReserva4, moneyReserva1, moneyReserva2,
+  moneyReserva3, moneyReserva4, padbyte, l1, l2, l3, l4, m1, m2, m3, m4,
+  cm_varejo_otn, cm_real_otn, storeno, shortReserva1, shortReserva2,
+  bits, s1, s2, s3, s4, prdno, grade, last_doc, c1)
+select qtty_varejo, qtty_atacado, cm_varejo, cm_real, last_date, last_qtty,
+  last_cost, avg_date, chk_qtty, chk_date, chk_empno, lastchangedt, longReserva1,
+   0 as longReserva2, longReserva3, longReserva4, moneyReserva1, moneyReserva2,
+  moneyReserva3, moneyReserva4, padbyte, l1, l2, l3, l4, m1, m2, m3, m4,
+  cm_varejo_otn, cm_real_otn, 10 as storeno, shortReserva1, shortReserva2,
+  bits, s1, s2, s3, s4, prdno, grade, last_doc, c1
+from sqldados.stk
+WHERE storeno = 4
+  AND prdno = :prdno
+  AND grade = :grade;
+
 UPDATE sqldados.stk
   SET longReserva1 = qtty_atacado
 WHERE longReserva2 <> :numero

@@ -18,23 +18,22 @@ class AtacadoViewModel(view: IAtacadoView): ViewModel<IAtacadoView>(view) {
   fun pesquisa() = exec {
     val tipoNota = view.tipoNota ?: throw ETipoOperacaoInvalido()
     when(tipoNota) {
-      SAIDA   -> pesquisaPedido()
-      ENTRADA -> pesquisaNota()
+      SAIDA   -> pesquisaItemNota(storenoPedido)
+      ENTRADA -> pesquisaItemNota(storenoNota)
     }
   }
 
-  private fun pesquisaNota() {
+  private fun pesquisaItemNota(storeno: Int) {
     val numeroNota = view.numeroNota
     if(numeroNota.isBlank()) throw ENumeroOperacao()
-    val nota = saci.findNotaSaida(storenoNota, numeroNota)
+    val nota = when(storeno) {
+      storenoPedido -> saci.findPedido(storeno, numeroNota)
+      storenoNota   -> saci.findNotaEntrada(storeno, numeroNota)
+      else          -> null
+    }
+    if(nota?.produtos?.isEmpty() == true) throw ENotaPedidoSemProdutos()
     view.nota = nota
-  }
-
-  private fun pesquisaPedido() {
-    val numeroNota = view.numeroNota
-    if(numeroNota.isBlank()) throw ENumeroOperacao()
-    val nota = saci.findPedido(storenoPedido, numeroNota)
-    view.nota = nota
+    if(nota == null) view.showInformation("Pedido/Nota não encontrado")
   }
 
   fun processamento() = exec {
@@ -49,15 +48,13 @@ class AtacadoViewModel(view: IAtacadoView): ViewModel<IAtacadoView>(view) {
   }
 
   private fun processaNota(nota: Nota) {
-    pesquisaNota()
     saci.criaNotaTransferencia(storenoNota, storenoPedido, nota)
-    pesquisaNota()
+    pesquisa()
   }
 
   private fun processaPedido(nota: Nota) {
-    pesquisaPedido()
     saci.criaNotaTransferencia(storenoPedido, storenoNota, nota)
-    pesquisaPedido()
+    pesquisa()
   }
 
   fun desfaz() {
@@ -74,7 +71,8 @@ interface IAtacadoView: IView {
 }
 
 class ETipoOperacaoInvalido: EViewModelError("O tipo de operação é inválido")
-class ENumeroOperacao: EViewModelError("O numero da operação é inválido")
+class ENumeroOperacao: EViewModelError("O numero da Nota/Pedido é inválido")
 class EStatusOperacao(val status: String): EViewModelError("O status $status não é aceito")
-class EDadosNaoSelecionado: EViewModelError("Dados não selecionado")
-class ENotaProcessada: EViewModelError("Esse número já foi processado")
+class EDadosNaoSelecionado: EViewModelError("Dados da Nota/Pedido não foram selecionado")
+class ENotaProcessada(): EViewModelError("Nota/Pedido já foi processado")
+class ENotaPedidoSemProdutos(): EViewModelError("A Nota/Pedido está sem produtos")

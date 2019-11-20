@@ -100,7 +100,7 @@ class QuerySaci: QueryDB(driver, url, username, password) {
 
   private fun insertNotaEntrada(storenoEntrada: Int, storenoSaida: Int, numero: Int, invno: Int, nota: Nota) {
     val sql = "/sql/insertNotaEntrada.sql"
-    val ordno = nota.numero
+    val ordno = nota.nfno
     val valor = nota.valor
     val vendno = findVendno(storenoSaida)
     script(sql) {q ->
@@ -116,7 +116,7 @@ class QuerySaci: QueryDB(driver, url, username, password) {
 
   private fun insertNotaSaida(storenoSaida: Int, storenoEntrada: Int, numero: Int, xano: Int, nota: Nota) {
     val sql = "/sql/insertNotaSaida.sql"
-    val ordno = nota.numero
+    val ordno = nota.nfno
     val valor = nota.valor
     val custno = findCustno(storenoEntrada)
     script(sql) {q ->

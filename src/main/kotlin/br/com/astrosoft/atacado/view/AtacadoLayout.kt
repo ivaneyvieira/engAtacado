@@ -87,6 +87,7 @@ class AtacadoLayout: ViewLayout<IAtacadoView, AtacadoViewModel>(), IAtacadoView 
     edtNfSaida?.value = ""
     edtNfEntrada?.value = ""
     dataProviderDados.items.clear()
+    dataProviderDados.refreshAll()
   }
 
   init {
@@ -159,6 +160,8 @@ class AtacadoLayout: ViewLayout<IAtacadoView, AtacadoViewModel>(), IAtacadoView 
       }
     }
     edtPedidoNota?.focus()
+    edtPedidoNota?.value = ""
+    nota = null
   }
 
   fun cabercalhoDados() {

@@ -6,8 +6,10 @@ open class ViewModel<V: IView>(val view: V) {
       block()
     } catch(e: EViewModelError) {
       view.showError(e.message ?: "Erro generico")
+      throw e
     } catch(e: EViewModelWarning) {
       view.showWarning(e.message ?: "Aviso generico")
+      throw e
     }
   }
 }

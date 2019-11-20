@@ -43,6 +43,7 @@ class AtacadoViewModel(view: IAtacadoView): ViewModel<IAtacadoView>(view) {
   }
 
   fun processamento() = exec {
+    pesquisa()
     val nota = view.nota ?: throw EDadosNaoSelecionado()
     val tipoNota = view.tipoNota ?: throw ETipoOperacaoInvalido()
     if(nota.isProcessada) throw ENotaProcessada()
@@ -51,19 +52,19 @@ class AtacadoViewModel(view: IAtacadoView): ViewModel<IAtacadoView>(view) {
       ENTRADA -> processaNota(nota)
     }
     view.showInformation("Processamento concluido com sucesso!!!")
+    pesquisa()
   }
 
   private fun processaNota(nota: Nota) {
     saci.criaNotaTransferencia(storenoNota, storenoPedido, nota)
-    pesquisa()
   }
 
   private fun processaPedido(nota: Nota) {
     saci.criaNotaTransferencia(storenoPedido, storenoNota, nota)
-    pesquisa()
   }
 
   fun desfaz() = exec {
+    pesquisa()
     val nota = view.nota ?: throw EDadosNaoSelecionado()
     val tipoNota = view.tipoNota ?: throw ETipoOperacaoInvalido()
     if(!nota.isProcessada) throw ENaoNotaProcessada()

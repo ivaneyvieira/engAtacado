@@ -103,7 +103,7 @@ class AtacadoLayout: ViewLayout<IAtacadoView, AtacadoViewModel>(), IAtacadoView 
   }
 
   fun titulo() {
-    h6("Estoque varejo")
+    h6("Estoque atacado")
   }
 
   fun filtro() {

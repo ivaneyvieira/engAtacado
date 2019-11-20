@@ -200,6 +200,36 @@ class QuerySaci: QueryDB(driver, url, username, password) {
     }
   }
 
+  private fun cancelaNotaEntrada(storeno: Int, numero: String) {
+    transaction {
+      val sqlCancela = """UPDATE sqldados.inv
+                          SET  bits = bits | POW(2, 4)
+                          WHERE nfname = :numero
+                            AND storeno = :storeno
+                            AND invse = '66'"""
+      query(sqlCancela) {q ->
+        q.addOptionalParameter("storeno", storeno)
+        q.addOptionalParameter("numero", numero)
+        q.executeUpdate()
+      }
+    }
+  }
+
+  private fun cancelaNotaSaida(storeno: Int, numero: String) {
+    transaction {
+      val sqlCancela = """UPDATE sqldados.nf
+                          SET STATUS = 1
+                          WHERE nfno    = :numero
+                            AND storeno = :storeno
+                            AND nfse    = '66'"""
+      query(sqlCancela) {q ->
+        q.addOptionalParameter("storeno", storeno)
+        q.addOptionalParameter("numero", numero)
+        q.executeUpdate()
+      }
+    }
+  }
+
   companion object {
     private val db = DB("saci")
     internal val driver = db.driver

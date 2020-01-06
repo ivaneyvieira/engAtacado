@@ -6,7 +6,7 @@ DO @PEDIDO := :ordno;
 DO @SERIE := 66;
 DO @TIPO := :tipo;
 DO @FATOR := IF(@TIPO = 'E', 1, - 1);
-DO @DOC := IF(@TIPO = 'E', " AJUS ENT ", " AJUS SAI ");
+DO @DOC := IF(@TIPO = 'E', ' AJUS ENT ', ' AJUS SAI ');
 
 /****************************************************************************
   Dados do pedido
@@ -128,7 +128,7 @@ FROM T
 WHERE @TIPO = 'E';
 
 UPDATE sqldados.stk INNER JOIN T USING (storeno, prdno, grade)
-SET last_doc = CONCAT(@NFNO, " 66 ")
+SET last_doc = CONCAT(@NFNO, ' 66 ')
 WHERE @TIPO = 'E';
 
 /****************************************************************************
@@ -180,7 +180,7 @@ FROM T
 WHERE @TIPO = 'S';
 
 UPDATE sqldados.stk INNER JOIN T USING (storeno, prdno, grade)
-SET last_doc = CONCAT(@NFNO, " 66 ")
+SET last_doc = CONCAT(@NFNO, ' 66 ')
 WHERE @TIPO = 'S';
 
 UPDATE sqldados.eord AS E

@@ -5,6 +5,13 @@ DO @INVNO := :invno;
 DO @NFNO := :numero;
 DO @vendno := :vendno;
 
+SELECT V.no AS vendno, @OBS := TRIM(IFNULL(CONCAT(C.no, ' ', MID(C.id_sname, 1, 3)), '')) AS obs
+FROM sqldados.vend         AS V
+  LEFT JOIN sqldados.custp AS C
+              ON C.cpf_cgc = V.cgc
+WHERE V.no = @vendno
+GROUP BY V.no;
+
 INSERT INTO sqldados.inv(invno, vendno, ordno, xfrno, issue_date, DATE, comp_date, ipi, icm,
                          freight, netamt, grossamt, subst_trib, discount, prdamt, despesas,
                          base_ipi, aliq, cfo, nfNfno, auxLong1, auxLong2, auxMoney1, auxMoney2,
@@ -38,6 +45,6 @@ SELECT @INVNO AS invno, :vendno AS vendno, @ordno AS ordno, 0 AS xfrno,
        0 AS auxShort9, 0 AS auxShort10, 0 AS auxShort11, 0 AS auxShort12, 0 AS auxShort13,
        0 AS auxShort14, 0 AS bits2, 0 AS bits3, 0 AS bits4, 0 AS bits5, 0 AS s1, 0 AS s2, 0 AS s3,
        0 AS s4, 0 AS s5, 0 AS s6, 0 AS s7, 0 AS s8, @NFNO AS nfname, '66' AS invse, 2 AS account,
-       '66' AS remarks, '' AS contaCredito, '' AS contaDebito, '' AS nfNfse, '' AS auxStr1,
+       @OBS AS remarks, '' AS contaCredito, '' AS contaDebito, '' AS nfNfse, '' AS auxStr1,
        '' AS auxStr2, '' AS auxStr3, '' AS auxStr4, '' AS auxStr5, '' AS auxStr6, '' AS c1, '' AS c2
 FROM DUAL

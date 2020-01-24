@@ -31,9 +31,8 @@ class QuerySaci: QueryDB(driver, url, username, password) {
     }
   }
 
-  fun criaNotaEntrada(storenoEntrada: Int, storenoSaida: Int, nota: Nota) {
+  fun criaNotaEntrada(numero : Int, storenoEntrada: Int, storenoSaida: Int, nota: Nota) {
     transaction {
-      val numero = newNfno(storenoEntrada)
       val invno = newInvno()
       insertNotaEntrada(storenoEntrada, storenoSaida, numero, invno, nota)
       nota.produtos.forEach {item ->
@@ -42,9 +41,8 @@ class QuerySaci: QueryDB(driver, url, username, password) {
     }
   }
 
-  fun criaNotaSaida(storenoSaida: Int, storenoEntrada: Int, nota: Nota) {
+  fun criaNotaSaida(numero : Int, storenoSaida: Int, storenoEntrada: Int, nota: Nota) {
     transaction {
-      val numero = newNfno(storenoSaida)
       val xano = newXano(storenoSaida)
       insertNotaSaida(storenoSaida, storenoEntrada, numero, xano, nota)
       nota.produtos.forEach {item ->
@@ -55,8 +53,9 @@ class QuerySaci: QueryDB(driver, url, username, password) {
 
   fun criaNotaTransferencia(storenoSaida: Int, storenoEntrada: Int, nota: Nota) {
     transaction {
-      criaNotaSaida(storenoSaida, storenoEntrada, nota)
-      criaNotaEntrada(storenoEntrada, storenoSaida, nota)
+      val numero = newNfno(storenoSaida)
+      criaNotaSaida(numero, storenoSaida, storenoEntrada, nota)
+      criaNotaEntrada(numero, storenoEntrada, storenoSaida, nota)
     }
   }
 
@@ -138,7 +137,7 @@ class QuerySaci: QueryDB(driver, url, username, password) {
     }
     val nfno = if(num == 0) 1 else num
     val sqlUpdate =
-      "INSERT INTO sqldados.lastno(no, storeno, dupse, se, padbyte) " + "VALUES(:numero, :storeno , 0 , 66 , '')"
+      "INSERT INTO sqldados.lastno(no, storeno, dupse, se, padbyte) VALUES(:numero, :storeno , 0 , 66 , '')"
 
     query(sqlUpdate) {q ->
       q.addParameter("storeno", storeno)

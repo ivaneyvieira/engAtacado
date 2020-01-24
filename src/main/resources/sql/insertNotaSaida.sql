@@ -5,19 +5,20 @@ DO @ordno := :ordno;
 DO @XANO := :xano;
 DO @custno := :custno;
 
+SELECT @OBS := TRIM(IFNULL(CONCAT(C.no, ' ', MID(C.id_sname, 1, 3)), '')) AS obs
+FROM sqldados.custp AS C
+WHERE C.no = @custno;
+
 INSERT INTO sqldados.nf(xano, nfno, custno, issuedate, delivdate, sec_amt, fre_amt, netamt,
-                        grossamt, discount, icms_amt,
-                        tax_paid, ipi_amt, base_calculo_ipi, iss_amt, base_iss_amt, isento_amt,
-                        subst_amt, baseIcmsSubst, icmsSubst, vol_no,
+                        grossamt, discount, icms_amt, tax_paid, ipi_amt, base_calculo_ipi, iss_amt,
+                        base_iss_amt, isento_amt, subst_amt, baseIcmsSubst, icmsSubst, vol_no,
                         vol_qtty, cfo, invno, cfo2, auxLong1, auxLong2, auxLong3, auxLong4, auxMy1,
                         auxMy2, auxMy3, auxMy4, eordno, l1, l2, l3, l4, l5, l6, l7, l8, m1, m2, m3,
                         m4, m5, m6, m7, m8, vol_gross, vol_net, mult, storeno, pdvno, carrno, empno,
-                        status,
-                        natopno, xatype, storeno_from, tipo, padbits, bits, usernoCancel,
-                        custno_addno, empnoDiscount, auxShort1, auxShort2,
-                        auxShort3, auxShort4, auxShort5, paymno, s1, s2, s3, s4, s5, s6, s7, s8,
-                        nfse, ship_by, vol_make, vol_kind, remarks,
-                        padbyte, print_remarks, remarksCancel, c1, c2, wshash)
+                        status, natopno, xatype, storeno_from, tipo, padbits, bits, usernoCancel,
+                        custno_addno, empnoDiscount, auxShort1, auxShort2, auxShort3, auxShort4,
+                        auxShort5, paymno, s1, s2, s3, s4, s5, s6, s7, s8, nfse, ship_by, vol_make,
+                        vol_kind, remarks, padbyte, print_remarks, remarksCancel, c1, c2, wshash)
 SELECT @XANO AS xano, @NFNO AS nfno, :custno AS custno, CURRENT_DATE * 1 AS issuedate,
        CURRENT_DATE * 1 AS delivdate, 0 AS sec_amt, 0 AS fre_amt, 0 AS netamt,
        @VALOR * 100 AS grossamt, 0 AS discount, 0 AS icms_amt, 0 AS tax_paid, 0 AS ipi_amt,
@@ -31,6 +32,6 @@ SELECT @XANO AS xano, @NFNO AS nfno, :custno AS custno, CURRENT_DATE * 1 AS issu
        1 AS tipo /*Tranferencia*/, 0 AS padbits, 0 AS bits, 0 AS usernoCancel, 0 AS custno_addno,
        0 AS empnoDiscount, 0 AS auxShort1, 0 AS auxShort2, 0 AS auxShort3, 0 AS auxShort4,
        0 AS auxShort5, 0 AS paymno, 0 AS s1, 0 AS s2, 0 AS s3, 0 AS s4, 0 AS s5, 0 AS s6, 0 AS s7,
-       0 AS s8, '66' AS nfse, '' AS ship_by, '' AS vol_make, '' AS vol_kind, '66' AS remarks,
+       0 AS s8, '66' AS nfse, '' AS ship_by, '' AS vol_make, '' AS vol_kind, @OBS AS remarks,
        '' AS padbyte, '' AS print_remarks, '' AS remarksCancel, '' AS c1, '' AS c2, '' AS wshash
 FROM DUAL
